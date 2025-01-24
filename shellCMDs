@@ -1,0 +1,12 @@
+# CMD These command-line editing commands are the most helpful for new users. For other commands, refer to the bash(1) man page.
+bash(1), date(1), file(1), magic(5), cat(1), more(1), less(1), head(1), passwd(1), tail(1), and wc(1) man pages
+
+# Shortcut	Description
+Ctrl+A	Jump to the beginning of the command line.
+Ctrl+E	Jump to the end of the command line.
+Ctrl+U	Clear from the cursor to the beginning of the command line.
+Ctrl+K	Clear from the cursor to the end of the command line.
+Ctrl+LeftArrow	Jump to the beginning of the previous word on the command line.
+Ctrl+RightArrow	Jump to the end of the next word on the command line.
+Ctrl+R	Search the history list of commands for a pattern.
+
