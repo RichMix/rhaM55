@@ -1,0 +1,88 @@
+# Shell Basics
+
+Commands that are entered at the shell prompt have three basic parts:
+
+Command to run.
+
+Options to adjust the behavior of the command.
+
+Arguments, which are typically targets of the command.
+
+The command is the name of the program to run. It might be followed by one or more options, which adjust the behavior of the command or what it does. Options normally start with one or two dashes (-a or --all, for example) to distinguish them from arguments. Commands might also be followed by one or more arguments, which often indicate a target that the command should operate on.
+
+For example, in the usermod -L user01 string, usermod is the command, -L is the option, and user01 is the argument. This command locks the password of the user01 user account.
+
+Log in to a Local System
+A terminal is a text-based interface to enter commands into and print output from a computer system. To run the shell, you must log in to the computer on a terminal.
+
+A hardware keyboard and display for input and output might be directly connected to the computer. This is the physical console from the Linux machine. The physical console supports multiple virtual consoles, which can run on separate terminals. Each virtual console supports an independent login session. You can switch between the virtual consoles by pressing Ctrl+Alt and a function key (F1 through F6) at the same time. Most of these virtual consoles run a terminal that provides a text login prompt. If you enter your username and password correctly, then you log in and get a shell prompt.
+
+The computer might provide a graphical login prompt on one of the virtual consoles. You can use the graphical login prompt to log in to a graphical environment. The graphical environment also runs on a virtual console. To get a shell prompt, you must start a terminal program in the graphical environment. The shell prompt is provided in an application window of your graphical terminal program.
+
+Note
+Many system administrators choose not to run a graphical environment on their servers, because users do not log in to servers as a desktop workspace. A server's workload can more effectively use the significant resources that a graphical environment uses.
+
+In Red Hat Enterprise Linux 9, if the graphical environment is available, then the login screen runs on the first virtual console, which is called tty1. Five additional text login prompts are available on virtual consoles two (tty2) through six (tty6).
+
+The graphical environment starts on the first virtual console that a login session is not currently using. Normally, your graphical session replaces the login prompt on the second virtual console (tty2). However, if an active text login session (not just a login prompt) is using that console, then the next free virtual console is used instead.
+
+The graphical login screen continues to run on the first virtual console (tty1). If you are already logged in to a graphical session, and switch to another user in the graphical environment without logging out, then another graphical environment is started for that user on the next available virtual console.
+
+When you log out of a graphical environment, it exits the virtual console, and the physical console automatically switches back to the graphical login screen on the first virtual console.
+
+Note
+In Red Hat Enterprise Linux 6 and 7, the graphical login screen runs on the first virtual console, but when you log in, your initial graphical environment replaces the login screen on the first virtual console instead of starting on a new virtual console. In Red Hat Enterprise Linux 8, the behavior is the same as in Red Hat Enterprise Linux 9.
+
+A headless server does not have a keyboard and display that are permanently connected to it. A data center might be filled with many racks of headless servers, and not providing each with a keyboard and display saves space and expense. For administrators to log in, a login prompt for a headless server might be provided by its serial console, which runs on a serial port that is connected to a networked console server for remote access.
+
+The serial console is normally used to access the server if the server network card becomes misconfigured and logging to the server over the conventional network connection becomes impossible. Most of the time, however, headless servers are accessed by other means over the network, for example by using Virtual Network Computing (VNC) for running a graphical interface on the target machine.
+
+Log in to a Remote System
+Linux users and administrators often need to get shell access to a remote system by connecting to it over the network. In a modern computing environment, many headless servers are virtual machines or are running as public or private cloud instances. These systems are not physical and do not have real hardware consoles. They might not even provide access to their (simulated) physical console or serial console.
+
+In Linux, the most common way to get a shell prompt on a remote system is to use Secure Shell (SSH). Most Linux systems (including Red Hat Enterprise Linux) and macOS provide the OpenSSH command-line program ssh for this purpose.
+
+In this example, a user with a shell prompt on the host machine uses ssh to log in to the remote Linux system remotehost as the user remoteuser:
+
+[user@host ~]$ ssh remoteuser@remotehost
+remoteuser@remotehost's password: password
+[remoteuser@remotehost ~]$
+The ssh command encrypts the connection to secure the communication against eavesdropping or hijacking of the passwords and content.
+
+Some systems, such as new cloud instances, for tighter security do not allow users to use a password to log in with ssh. An alternative way to authenticate to a remote machine without entering a password is through public key authentication.
+
+With this authentication method, users have a special identity file with a private key, which is equivalent to a password, and which they keep secret. Their account on the server is configured with a matching public key, which does not have to be secret. When logging in, users can configure ssh to provide the private key. If their matching public key is installed in that account on that remote server, then it logs in the user without asking for a password.
+
+In the next example, a user with a shell prompt on the host machine logs in to remotehost as remoteuser with ssh, by using the public key authentication method. The ssh command -i option is used to specify the user's private key file, which is mylab.pem. The matching public key is already set up as an authorized key in the remoteuser account.
+
+[user@host ~]$ ssh -i mylab.pem remoteuser@remotehost
+[remoteuser@remotehost ~]$
+For the connection to work, only the user who owns the file can have access to read the private key file. In the preceding example, where the private key is in the mylab.pem file, you can use the chmod 600 mylab.pem command to ensure that only the owner can read the file. How to set file permissions is discussed in more detail in a later chapter.
+
+Users might also have configured private keys that are tried automatically, but that discussion is beyond the scope of this section. The References at the end of this section contain links to more information about this topic.
+
+Note
+When you first log in to a new machine, you are prompted with a warning from ssh that it cannot establish the authenticity of the host:
+
+[user@host ~]$ ssh -i mylab.pem remoteuser@remotehost
+The authenticity of host 'remotehost (192.0.2.42)' can't be established.
+ECDSA key fingerprint is 47:bf:82:cd:fa:68:06:ee:d8:83:03:1a:bb:29:14:a3.
+Are you sure you want to continue connecting (yes/no)? yes
+[remoteuser@remotehost ~]$
+Each time that you connect to a remote host with ssh, the remote host sends its host key to authenticate itself and to help to set up encrypted communication. The ssh command compares the host key against a list of saved host keys to ensure that it is not changed. If the host key changed, then it might indicate that someone is trying to pretend to be that host to hijack the connection, which is also known as an interceptor attack. In SSH, host keys protect against interceptor attacks; these host keys are unique for each server; and they need to be changed periodically and whenever a compromise is suspected.
+
+You get this warning when your local machine does not have a saved host key for the remote host. If you enter yes, then the host key that the remote host sent is accepted and saved for future reference. The login process continues, and you should not see this message again when connecting to this host. If you enter no, then the host key is rejected and the connection is closed.
+
+If the local machine does have a saved host key and it does not match the one that the remote host sent, then the connection is closed automatically with a warning.
+
+Log Out from a Remote System
+When you are finished with the shell and want to quit, you can choose one of several ways to end the session. You can enter the exit command to terminate the current shell session. Alternatively, finish a session by pressing Ctrl+D.
+
+The following example shows a user who logs out of an SSH session:
+
+[remoteuser@remotehost ~]$ exit
+logout
+Connection to remotehost closed.
+[user@host ~]$
+References
+intro(1), bash(1), pts(4), ssh(1), and ssh-keygen(1) man pages
