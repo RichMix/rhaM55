@@ -1,0 +1,140 @@
+## Make Links Between Files
+
+Objectives
+Make multiple file names reference the same file with hard links and symbolic (or "soft") links.
+
+## Manage Links Between Files
+You can create multiple file names that point to the same file. These file names are called links.
+
+You can create two types of links: a hard link, or a symbolic link (sometimes called a soft link). 
+Each way has its advantages and disadvantages.
+
+## Create Hard Links
+
+Every file starts with a single hard link, from its initial name to the data on the file system. 
+When you create a hard link to a file, you create another name that points to that same data. 
+The new hard link acts exactly like the original file name. 
+After the link is created, you cannot tell the difference between the new hard link and the original name of the file.
+
+You can determine whether a file has multiple hard links by using the ls -l command. 
+One item that it reports is each file's link count, the number of hard links that the file has. 
+In the next example, the link count of the newfile.txt file is 1. It has exactly one absolute path, which is the /home/user/newfile.txt location.
+
+```[user@host ~]$ pwd
+/home/user
+[user@host ~]$ ls -l newfile.txt
+-rw-r--r--. 1 user user 0 Mar 11 19:19 newfile.txt```
+
+# You can use the ln command to create a hard link (another file name) that points to an existing file. The command needs at least two arguments: a path to the existing file, and the path to the hard link that you want to create.
+
+# The following example creates a hard link called newfile-hlink2.txt for the existing newfile.txt file in the /tmp directory.
+
+```[user@host ~]$ ln newfile.txt /tmp/newfile-hlink2.txt
+[user@host ~]$ ls -l newfile.txt /tmp/newfile-hlink2.txt
+-rw-rw-r--. 2 user user 12 Mar 11 19:19 newfile.txt
+-rw-rw-r--. 2 user user 12 Mar 11 19:19 /tmp/newfile-hlink2.txt```
+
+# To determine whether two files are hard linked, use the ls command -i option to list each file's inode number. If the files are on the same file system and their inode numbers are the same, then the files are hard links that point to the same data file content.
+
+```[user@host ~]$ ls -il newfile.txt /tmp/newfile-hlink2.txt
+8924107 -rw-rw-r--. 2 user user 12 Mar 11 19:19 newfile.txt
+8924107 -rw-rw-r--. 2 user user 12 Mar 11 19:19 /tmp/newfile-hlink2.txt```
+
+*** Important ***
+
+Hard links that reference the same file share the inode structure with the link count, access permissions, user and group ownership, time stamps, and file content. When that information is changed for one hard link, then the other hard links for the same file also show the new information. This behavior is because each hard link points to the same data on the storage device.
+
+Even if the original file is deleted, you can still access the contents of the file provided that at least one other hard link exists. 
+Data is deleted from storage only when the last hard link is deleted, which makes the file contents unreferenced by any hard link.
+
+```[user@host ~]$ rm -f newfile.txt
+[user@host ~]$ ls -l /tmp/newfile-hlink2.txt
+-rw-rw-r--. 1 user user 12 Mar 11 19:19 /tmp/newfile-hlink2.txt
+[user@host ~]$ cat /tmp/newfile-hlink2.txt
+Hello World```
+
+
+Limitations of Hard Links
+Hard links have some limitations. First, you can use hard links only with regular files. 
+You cannot use the ln command to create a hard link to a directory or special file.
+
+Second, you can use hard links only if both files are on the same file system. 
+The file-system hierarchy can be composed of multiple storage devices. 
+Depending on the configuration of your system, when you change into a new directory, that directory and its contents might be stored on a different file system.
+
+You can use the df command to list the directories that are on different file systems. 
+For example, you might see the following output:
+
+```[user@host ~]$ df
+Filesystem                   1K-blocks    Used Available Use% Mounted on
+devtmpfs                        886788       0    886788   0% /dev
+tmpfs                           902108       0    902108   0% /dev/shm
+tmpfs                           902108    8696    893412   1% /run
+tmpfs                           902108       0    902108   0% /sys/fs/cgroup
+/dev/mapper/rhel_rhel9--root  10258432 1630460   8627972  16% /
+/dev/sda1                      1038336  167128    871208  17% /boot
+tmpfs                           180420       0    180420   0% /run/user/1000```
+
+Files in two different "Mounted on" directories and their subdirectories are on different file systems. So, in the system in this example, you can create a hard link between the /var/tmp/link1 and /home/user/file files, because they are both subdirectories of the / directory but not of any other directory on the list. However, you cannot create a hard link between the /boot/test/badlink and /home/user/file files. The first file is in a subdirectory of the /boot directory (on the "Mounted on" list) and it is in the /dev/sda1 file system. The second file is in the /dev/mapper/rhel_rhel9—​root file system.
+
+# Create Symbolic Links
+
+- The ln command -s option creates a symbolic link, which is also called a "soft link". A symbolic link is not a regular file, but a special type of file that points to an existing file or directory.
+
+- Symbolic links have some advantages over hard links:
+
+- Symbolic links can link two files on different file systems.
+
+- Symbolic links can point to a directory or special file, not just to a regular file.
+
+
+In the following example, the ln -s command creates a symbolic link for the /home/user/newfile-link2.txt file. The name for the symbolic link is /tmp/newfile-symlink.txt.
+
+```[user@host ~]$ ln -s /home/user/newfile-link2.txt /tmp/newfile-symlink.txt
+[user@host ~]$ ls -l newfile-link2.txt /tmp/newfile-symlink.txt
+-rw-rw-r--. 1 user user 12 Mar 11 19:19 newfile-link2.txt
+lrwxrwxrwx. 1 user user 11 Mar 11 20:59 /tmp/newfile-symlink.txt -> /home/user/newfile-link2.txt
+[user@host ~]$ cat /tmp/newfile-symlink.txt```
+
+Symbolic Hello World
+In the preceding example, the first character of the long listing for the /tmp/newfile-symlink.txt file is l (letter l) instead of -. This character indicates that the file is a symbolic link and not a regular file.
+
+When the original regular file is deleted, the symbolic link still points to the file but the target is gone. A symbolic link that points to a missing file is called a "dangling symbolic link".
+
+```[user@host ~]$ rm -f newfile-link2.txt
+[user@host ~]$ ls -l /tmp/newfile-symlink.txt
+lrwxrwxrwx. 1 user user 11 Mar 11 20:59 /tmp/newfile-symlink.txt -> /home/user/newfile-link2.txt
+[user@host ~]$ cat /tmp/newfile-symlink.txt
+
+cat: /tmp/newfile-symlink.txt: No such file or directory```
+
+
+# Important
+One side-effect of the dangling symbolic link in the preceding example is that if you create a file with the same name as the deleted file (/home/user/newfile-link2.txt), 
+then the symbolic link is no longer "dangling" and points to the new file. 
+Hard links do not work in this way. 
+If you delete a hard link and then use normal tools (rather than ln) to create a file with the same name, 
+then the new file is not linked to the old file. 
+Consider the following way to compare hard links and symbolic links, to understand how they work:
+A hard link points a name to data on a storage device.
+
+A symbolic link points a name to another name, which points to data on a storage device.
+
+A symbolic link can point to a directory. The symbolic link then acts like the directory. 
+If you use cd to change to the symbolic link, then the current working directory becomes the linked directory.
+Some tools might track that you followed a symbolic link to get there. For example, by default, cd updates your current working directory by using the name of the symbolic link rather than the name of the actual directory. 
+If you want to update the current working directory by using the name of the actual directory, then you can use the -P option.
+
+The following example creates a symbolic link called /home/user/configfiles that points to the /etc directory.
+
+```[user@host ~]$ ln -s /etc /home/user/configfiles
+[user@host ~]$ cd /home/user/configfiles
+[user@host configfiles]$ pwd
+/home/user/configfiles
+[user@host configfiles]$ cd -P /home/user/configfiles
+[user@host etc]$ pwd
+/etc```
+References
+ln(1) man page
+
+info ln (Make links between files)
