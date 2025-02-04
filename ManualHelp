@@ -1,0 +1,107 @@
+Introduction to the Linux Manual Pages
+One source of documentation that is generally available on the local system is system manual pages or man pages. Software packages ship these pages to provide documentation, and you can access them from the command line by using the man command. The pages are stored in subdirectories of the /usr/share/man directory.
+
+Man pages originated from the historical Linux Programmer's Manual, which because of its size is split into multiple sections. Each section contains information about a particular topic.
+
+Table 4.1. Common Sections of the Linux Manual
+
+Section	Content type	Description
+1	User commands	Both executable and shell programs
+2	System calls	Kernel routines that are invoked from user space
+3	Library functions	Provided by program libraries
+4	Special files	Such as device files
+5	File formats	For many configuration files and structures
+6	Games and screensavers	Historical section for amusing programs
+7	Conventions, standards, and miscellaneous	Protocols and file systems
+8	System administration and privileged commands	Maintenance tasks
+9	Linux kernel API	Internal kernel calls
+
+To distinguish identical topic names in different sections, man page references include the section number in parentheses after the topic. For example, passwd(1) describes the command to change passwords, whereas passwd(5) explains the /etc/passwd file format for storing local user accounts.
+
+To read specific man pages, use the man topic command. The man pages display contents one screen at a time. The man command searches manual sections in alphanumeric order. For example, man passwd displays passwd(1) by default. To display the man page topic from a specific section, you can use the man section topic command. For example, man 5 passwd displays passwd(5).
+
+Popular system administration topics are in sections 1 (user commands), 5 (file formats), and 8 (administrative commands). Administrators who use certain troubleshooting tools also use section 2 (system calls). The remaining sections are generally for programmer reference or advanced administration.
+
+Navigate and Search man Pages
+It is a critical administration skill to search efficiently for topics and to navigate man pages. Although you can use GUI tools to configure common system resources, using the command-line interface is more efficient. To navigate the command line effectively, you must be able to find the information that you need in the man pages.
+
+The following table lists some navigation commands when viewing man pages:
+
+Table 4.2. Navigate man Pages
+
+Command	Result
+Spacebar	Scroll forward (down) one screen.
+PageDown	Scroll forward one screen.
+PageUp	Scroll backward (up) one screen.
+DownArrow	Scroll forward one line.
+UpArrow	Scroll backward one line.
+D	Scroll forward one half-screen.
+U	Scroll backward one half-screen.
+/string	Search forward for string in the man page.
+N	Repeat previous search forward in the man page.
+Shift+N	Repeat previous search backward in the man page.
+G	Go to the start of the man page.
+Shift+G	Go to the end of the man page.
+Q	Exit man and return to the command shell prompt.
+
+Important
+You can use regular expressions to search in man pages. Although simple text search (such as passwd) works as expected, regular expressions use metacharacters (such as $, *, ., and ^) for more sophisticated pattern matching. Therefore, searching with strings that include program expression metacharacters, such as make $$$, might yield unexpected results.
+
+You can find more information about regular expressions and syntax in the regex(7) man topic.
+
+Read man Pages
+Man pages separate each topic into several parts. Most topics use the same headings and follow the same order. Typically, a topic does not feature all headings, because not all headings apply to all topics.
+
+Common headings are as follows:
+
+Table 4.3. Headings
+
+Heading	Description
+NAME	Subject name, usually a command or file name, a brief description
+SYNOPSIS	Summary of the command syntax
+DESCRIPTION	Description to provide a basic understanding of the topic
+OPTIONS	Explanation of the command execution options
+EXAMPLES	Examples of how to use the command, function, or file
+FILES	A list of files and directories that are related to the man page
+SEE ALSO	Related information, normally other man page topics
+BUGS	Known bugs in the software
+AUTHOR	Information about who contributed to the development of the topic
+
+Search for man Pages by Keyword
+Use the man command -k option (equivalent to the apropos command) to search for a keyword in man page titles and descriptions. As a result, the keyword search displays a list of keyword-matching man page topics with section numbers. For example, the following command searches for man pages with the word passwd:
+
+[user@host ~]$ man -k passwd
+chgpasswd (8)        - update group passwords in batch mode
+chpasswd (8)         - update passwords in batch mode
+fgetpwent_r (3)      - get passwd file entry reentrantly
+getpwent_r (3)       - get passwd file entry reentrantly
+...
+passwd (1)           - update user's authentication tokens
+passwd (1ossl)       - OpenSSL application commands
+passwd (5)           - password file
+passwd2des (3)       - RFS password encryption
+...
+The man command -K (uppercase) option searches for the keyword in the full-text page, not only in the titles and descriptions. A full-text search uses greater system resources and takes more time.
+
+With the full-text page search, the man command displays the first page with a match. Press Q to exit this first page, and the man command displays the next page.
+
+In this example, man displays each match, and you can view or skip each one.
+
+[user@host ~]# man -K passwd
+--Man-- next: cut(1p) [ view (return) | skip (Ctrl-D) | quit (Ctrl-C) ]
+Ctrl-D
+--Man-- next: logname(1p) [ view (return) | skip (Ctrl-D) | quit (Ctrl-C) ]
+Ctrl-D
+--Man-- next: sort(1p) [ view (return) | skip (Ctrl-D) | quit (Ctrl-C) ]
+Ctrl-D
+--Man-- next: xargs(1) [ view (return) | skip (Ctrl-D) | quit (Ctrl-C) ]
+Ctrl-D
+--Man-- next: chage(1) [ view (return) | skip (Ctrl-D) | quit (Ctrl-C) ]
+Ctrl-C
+Note
+Keyword searches rely on an index that is generated by the mandb(8) command, which must be run as root.
+
+The man-db-cache-update service automatically runs the mandb command when installing any package with man pages.
+
+References
+man(1), mandb(8), man-pages(7), less(1), intro(1), intro(2), intro(5), intro(7), and intro(8) man pages
