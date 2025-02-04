@@ -152,3 +152,21 @@ bash(1), cd(1), glob(7), isalpha(3), ls(1), path_resolution(7), and pwd(1) man p
 Red Hat logo
 Privacy Policy
 Red Hat Training Policies
+
+
+## Summary
+Files on a Linux system are organized into a single inverted tree of directories, a file-system hierarchy.
+
+Absolute paths start with a forward slash character (/) and specify the location of a file in the file-system hierarchy.
+
+Relative paths do not start with a forward slash character.
+
+Relative paths specify a file location in relation to the current working directory.
+
+You can use commands in combination with the dot (.), double dot (..), and tilde (~) special characters to refer to a file location in the file system.
+
+The mkdir, rmdir, cp, mv, and rm commands are key commands to manage files in Linux.
+
+Hard links and soft links are different ways for multiple file names to point to the same data.
+
+The Bash shell provides pattern matching, expansion, and substitution features to help you to run commands efficiently.
