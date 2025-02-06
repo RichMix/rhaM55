@@ -1,0 +1,27 @@
+# How many unique IPs
+
+cat access.log | cut -d " " -f 1 | sort | uniq | wc -l
+
+# Which requests threw which error codes
+
+cat access.log | cut -d '"' -f 3 | cut -d ' ' -f 2 | sort | uniq -c | sort -rn
+
+# Grep for doorbell 
+
+cat access.log | grep "bell"
+
+# Grep for Google Bot version check
+
+cat access.log | grep "Googlebot"
+
+# Shell Shock Grep
+
+cat access.log | grep '() { :; };'
+
+# Search for all lines that contain “Firefox” and the following characters which make up the version number, sort those values, and then get a unique count. 
+
+cat access.log | egrep -o "Firefox/.*" | sort | uniq -c
+
+# What is the most common HTTP method used? Get the unique values with a count of the occurrences of each value, and then sort in descending numeric order. 
+
+cat access.log | awk -F " " '{print $6}' | sort | uniq -c | sort -rn
