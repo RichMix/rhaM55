@@ -1,0 +1,49 @@
+// Open GParted or KDE Partition Manager (pre-installed in many distros).
+Identify unallocated space or shrink an existing partition to create free space.
+If modifying an existing partition:
+Right-click the partition and select Resize/Move.
+Shrink the partition to make space for the new distro (at least 20GB recommended).
+
+1. Root Partition (/)
+
+Type: ext4
+Size: At least 20GB (recommended 40GB+ if you plan to install many apps).
+Mount Point: /
+2. Boot Partition (/boot) (if using BIOS + MBR, you may not need this)
+Type: ext4 (or EFI System Partition (ESP) if using UEFI)
+Size: 512MB - 1GB
+Mount Point: /boot
+3. Swap Partition (Optional)
+If you have enough RAM (>16GB), you may not need a swap partition.
+Type: Linux swap
+Size: Equal to RAM size if using hibernation; otherwise, 4GB - 8GB is enough.
+⚠️ If you are on a UEFI system, make sure you DO NOT format or delete the existing EFI partition (/boot/efi). 
+Just use the same one for the new distro.
+
+Step 5: Apply Changes
+
+Double-check your partitions.
+Click "Apply" to write changes to the disk.
+Step 6: Install the New Distro
+Begin installation and select "Manual Partitioning" when prompted.
+Assign the partitions you just created:
+Root (/) → Choose the newly created ext4 partition.
+Boot (/boot) → Choose the separate ext4 partition (if created).
+Swap → If applicable, assign it as swap space.
+DO NOT format the other OS partitions unless you want to erase them.
+Ensure the bootloader is installed on the correct drive (usually /dev/sda or /dev/nvme0n1).
+Step 7: Update Bootloader (GRUB)
+If the new OS doesn’t appear on boot:
+
+Boot into the existing Linux OS.
+Open a terminal and run:
+bash
+Copy
+Edit
+sudo update-grub
+or, if using EFI, run:
+bash
+Copy
+Edit
+sudo grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
+sudo update-grub
