@@ -1,0 +1,105 @@
+Edit Text Files from the Shell Prompt
+Objectives
+Create and edit text files from the command line with the vim editor.
+
+Edit Files with Vim
+The fundamental design principle of Linux is that it supports storage of the information and configuration settings in text-based files. These files follow various structures such as lists of settings, INI-like formats, structured XML or YAML, and others. The advantage of storing files in a text-based structure is that they are edited with any text editor.
+
+Vim is an improved version of the vi editor, which is distributed with Linux and UNIX systems. Vim is a highly configurable and efficient editor that provides split-screen editing, color formatting, and highlighting for editing text.
+
+Benefits of the Vim Editor
+When a system uses a text-only shell prompt, you should know how to use at least one text editor for editing files. You can then edit text-based configuration files from a terminal window or remote logins through the ssh command or the Web Console. You also do not need access to a graphical desktop to edit files on a server, and that server might not need to run a graphical desktop environment.
+
+The key reason to learn Vim is that it is almost always installed by default on a server for editing text-based files. The Portable Operating System Interface or POSIX standard specified the vi editor on Linux, and many other UNIX-like operating systems largely do likewise.
+
+Vim is also used often as the vi implementation on other standard operating systems or distributions. For example, macOS currently includes a lightweight installation of Vim by default. So, Vim skills that are learned for Linux might also prove useful elsewhere.
+
+Get Started with Vim
+You can install the Vim editor in Red Hat Enterprise Linux by using either of two packages. These two packages provide different features and Vim commands for editing text-based files.
+
+With the vim-minimal package, you might install the vi editor with core features. This lightweight installation includes only the core features and the basic vi command. You can open a file for editing by using the vi command:
+
+[user@host ~]$ vi filename
+Alternatively, you can use the vim-enhanced package to install the Vim editor. This package provides a more comprehensive set of features, an online help system, and a tutorial program. Use the vim command to start Vim in this enhanced mode:
+
+[user@host ~]$ vim filename
+The core features of the Vim editor are available in both commands.
+
+If vim-enhanced is installed, then a shell alias is set so that if regular users run the vi command, then they automatically get the vim command instead. This alias does not apply to the root user and to other users with UIDs below 200 (which system services use).
+
+If vim-enhanced is installed and a regular user wants to use the vi command, then they might have to use the \vi command to override the alias temporarily. You can use \vi --version and vim --version to compare the feature sets of the two commands.
+
+Vim Operating Modes
+The Vim editor offers various modes of operation such as command mode, extended command mode, edit mode, and visual mode. As a Vim user, always verify the current mode, because the effect of keystrokes varies between modes.
+
+
+Figure 5.10: Moving between Vim modes
+When you first open Vim, it starts in command mode, which is used for navigation, cut and paste, and other text modification. Pressing the required keystroke accesses specific editing functions.
+
+An i keystroke enters insert mode, where all typed text becomes file content. Pressing Esc returns to command mode.
+
+A v keystroke enters visual mode, where multiple characters might be selected for text manipulation. Use Shift+V for multiline and Ctrl+V for block selection. To exit the visual mode, use the v, Shift+V, or Ctrl+V keystrokes.
+
+The : keystroke begins extended command mode for tasks such as writing the file (to save it) and quitting the Vim editor.
+
+Note
+If you are unsure which mode Vim is using, then press Esc a few times to get back into command mode. It is safe to press the Esc key in command mode repeatedly.
+
+The Minimum, Basic Vim Workflow
+Vim has efficient, coordinated keystrokes for advanced editing tasks. Although considered beneficial with practice, the capabilities of Vim can overwhelm new users.
+
+Red Hat recommends that you learn the following Vim keys and commands:
+
+The u key undoes the most recent edit.
+
+The x key deletes a single character.
+
+The :w command writes (saves) the file and remains in command mode for more editing.
+
+The :wq command writes (saves) the file and quits Vim.
+
+The :q! command quits Vim, and discards all file changes since the last write.
+
+Learning these commands helps a Vim user to accomplish any editing task.
+
+Rearrange Existing Text
+In Vim, you can yank and put (copy and paste), by using the y and p command characters. Position the cursor on the first character to select, and then enter visual mode. Use the arrow keys to expand the visual selection. When ready, press y to yank the selection into memory. Position the cursor at the new location, and then press p to put the selection at the cursor.
+
+Visual Mode in Vim
+Visual mode is useful to highlight and manipulate text in different lines and columns. You can enter various visual modes in Vim by using the following key combinations.
+
+Character mode : v
+
+Line mode : Shift+v
+
+Block mode : Ctrl+v
+
+Character mode highlights sentences in a block of text. The word VISUAL appears at the bottom of the screen. 
+  Press v to enter visual character mode. Shift+v enters line mode. VISUAL LINE appears at the bottom of the screen.
+
+Visual block mode is perfect for manipulating data files. Press the Ctrl+v keystroke to enter the visual block from the cursor. 
+VISUAL BLOCK appears at the bottom of the screen. Use the arrow keys to highlight the section to change.
+
+Note
+First, take the time to familiarize yourself with the basic Vim capabilities. Then, expand your Vim vocabulary by learning more Vim keystrokes.
+
+The exercise for this section uses the vimtutor command. This tutorial, from the vim-enhanced package, is an excellent way to learn the core Vim functions.
+
+Vim Configuration Files
+The /etc/vimrc and ~/.vimrc configuration files alter the behavior of the vim editor for the entire system or for a specific user respectively. 
+  Within these configuration files, you can specify behavior such as the default tab spacing, syntax highlighting, color schemes, and more. 
+    Modifying the behavior of the vim editor is particularly useful when working with languages such as YAML, which have strict syntax requirements. 
+    Consider the following ~/.vimrc file, which sets the default tab stop (denoted by the ts characters) to two spaces while editing YAML files. 
+      The file also includes the set number parameter to display line numbers while editing all files.
+
+[user@host ~]$ cat ~/.vimrc
+autocmd FileType yaml setlocal ts=2
+set number
+A complete list of vimrc configuration options is available in the references.
+
+References
+vim(1) man page
+
+The :help command in vim (if the vim-enhanced package is installed).
+
+Vim Reference Manual: Vim Options
