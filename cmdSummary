@@ -1,0 +1,16 @@
+Summary
+The user account types in Linux are the superuser, system users, and regular users.
+
+A user has a primary group and might be a member of supplementary groups.
+
+The /etc/passwd, /etc/group, and /etc/shadow critical files contain user and group information.
+
+You can run commands as the superuser with the su and sudo commands.
+
+The useradd, usermod, and userdel commands manage users.
+
+The groupadd, groupmod, and groupdel commands manage groups.
+
+The passwd command manages passwords for users.
+
+The chage command displays and configures password expiration settings for users.
