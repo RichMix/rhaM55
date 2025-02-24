@@ -86,6 +86,83 @@ user01 : The username for this user.
 
 x : The user's encrypted password was historically stored here; it is now a placeholder.
 
+Manage Local User Accounts
+Objectives
+Create, modify, and delete local user accounts.
+
+Manage Local Users
+You can use command-line tools to manage local user accounts. This section reviews some important tools.
+
+Create Users from the Command Line
+The useradd username command creates a user called username. It sets up the user's home directory and account information, and creates a private group for the user called username. At this point, a valid password is not set for the account, and the user cannot log in until a password is set.
+
+The useradd --help command displays the basic options to override the defaults. Usually, you can use the same options with the usermod command to modify an existing user.
+
+The /etc/login.defs file sets some default options for user accounts, such as the range of valid UID numbers and default password aging rules. The values in this file affect only newly created user accounts. A change to this file does not affect existing users.
+
+In Red Hat Enterprise Linux 9, the useradd command assigns new users the first free UID that is greater than or equal to 1000, unless you explicitly specify a UID by using the -u option.
+
+Modify Existing Users from the Command Line
+The usermod --help command displays the options to modify an account. Some common options are as follows:
+
+usermod options:	Usage
+-a, --append	Use it with the -G option to add the supplementary groups to the user's current set of group memberships instead of replacing the set of supplementary groups with a new set.
+-c, --comment COMMENT	Add the COMMENT text to the comment field.
+-d, --home HOME_DIR	Specify a home directory for the user account.
+-g, --gid GROUP	Specify the primary group for the user account.
+-G, --groups GROUPS	Specify a comma-separated list of supplementary groups for the user account.
+-L, --lock	Lock the user account.
+-m, --move-home	Move the user's home directory to a new location. You must use it with the -d option.
+-s, --shell SHELL	Specify a particular login shell for the user account.
+-U, --unlock	Unlock the user account.
+Delete Users from the Command Line
+The userdel username command removes the username user from /etc/passwd, but leaves the user's home directory intact. The userdel -r username command removes the user from /etc/passwd and deletes the user's home directory.
+
+Warning
+When you remove a user without specifying the userdel -r option, an unassigned UID now owns the user's files. If you create a user and that user is assigned the deleted user's UID, then the new account owns those files, which is a security risk. Typically, organization security policies disallow deleting user accounts, and instead lock them from being used, to avoid this scenario.
+
+The following example demonstrates how this scenario can lead to information leakage:
+
+[root@host ~]# useradd user01
+[root@host ~]# ls -l /home
+drwx------. 3 user01  user01    74 Mar  4 15:22 user01
+[root@host ~]# userdel user01
+[root@host ~]# ls -l /home
+drwx------. 3    1000    1000   74 Mar  4 15:22 user01
+[root@host ~]# useradd -u 1000 user02
+[root@host ~]# ls -l /home
+drwx------. 3 user02     user02       74 Mar  4 15:23 user02
+drwx------. 3 user02     user02       74 Mar  4 15:22 user01
+Notice that user02 now owns all files that user01 previously owned. The root user can use the find / -nouser -o -nogroup command to find all unowned files and directories.
+
+Set Passwords from the Command Line
+The passwd username command sets the initial password or changes the existing password for the username user. The root user can set a password to any value. The terminal displays a message if the password does not meet the minimum recommended criteria, but then you can retype the new password and the passwd command updates it successfully.
+
+[root@host ~]# passwd user01
+Changing password for user user01.
+New password: redhat
+BAD PASSWORD: The password is shorter than 8 characters
+Retype new password: redhat
+passwd: all authentication tokens updated successfully.
+[root@host ~]#
+A regular user must choose a password at least eight characters long. Do not use a dictionary word, the username, or the previous password.
+
+UID Ranges
+Red Hat Enterprise Linux uses specific UID numbers and ranges of numbers for specific purposes.
+
+UID 0 : The superuser (root) account UID.
+
+UID 1-200 : System account UIDs that are statically assigned to system processes.
+
+UID 201-999 : UIDs that are assigned to system processes that do not own files on this system. Software that requires an unprivileged UID is dynamically assigned a UID from this available pool.
+
+UID 1000+ : The UID range to assign to regular, unprivileged users.
+
+Note
+RHEL 6 and earlier versions use UIDs in the range 1-499 for system users and UIDs higher than 500 for regular users. You can change the useradd and groupadd default ranges in the /etc/login.defs file.
+
+References
+useradd(8), usermod(8), and userdel(8) man pages
 1000 : The UID number for this user account.
 
 1000 : The GID number for this user account's primary group. Groups are discussed later in this section.
