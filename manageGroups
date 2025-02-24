@@ -1,0 +1,87 @@
+Manage Local Group Accounts
+Objectives
+Create, modify, and delete local group accounts.
+
+Manage Local Groups
+Several command-line tools enable group management. Although you can use the Users GUI utility to manage groups, RedÂ Hat recommends that you use command-line tools.
+
+Create Groups from the Command Line
+The groupadd command creates groups. Without options, the groupadd command uses the next available GID from the range that the GID_MIN and GID_MAX variables specify in the /etc/login.defs file. By default, the command assigns a GID value that is greater than any other existing GIDs, even if a lower value becomes available.
+
+The groupadd command -g option specifies a GID for the group to use.
+
+[root@host ~]# groupadd -g 10000 group01
+[root@host ~]# tail /etc/group
+...output omitted...
+group01:x:10000:
+Note
+Because of the automatic creation of user private groups (GID 1000+), some administrators set aside a separate range of GIDs for creating supplementary groups for other purposes. However, this extra management is unnecessary, because a user's UID and primary GID do not need to be the same number.
+
+The groupadd command -r option creates system groups. As with normal groups, system groups use a GID from the range of listed valid system GIDs in the /etc/login.defs file. The SYS_GID_MIN and SYS_GID_MAX configuration items in the /etc/login.defs file define the range of system GIDs.
+
+[root@host ~]# groupadd -r group02
+[root@host ~]# tail /etc/group
+...output omitted...
+group01:x:10000:
+group02:x:988:
+Modify Existing Groups from the Command Line
+The groupmod command changes the properties of an existing group. The groupmod command -n option specifies a new name for the group.
+
+[root@host ~]# groupmod -n group0022 group02
+[root@host ~]# tail /etc/group
+...output omitted...
+group0022:x:988:
+Notice that the group name updates to group0022 from group02. The groupmod command -g option specifies a new GID.
+
+[root@host ~]# groupmod -g 20000 group0022
+[root@host ~]# tail /etc/group
+...output omitted...
+group0022:x:20000:
+Notice that the GID changes to 20000 from 988.
+
+Delete Groups from the Command Line
+The groupdel command removes groups.
+
+[root@host ~]# groupdel group0022
+Note
+You cannot remove a group if it is the primary group of an existing user. Similar to using the userdel command, ensure first that you locate files that the group owns.
+
+Change Group Membership from the Command Line
+The membership of a group is controlled with user management. Use the usermod -g command to change a user's primary group.
+
+[root@host ~]# id user02
+uid=1006(user02) gid=1008(user02) groups=1008(user02)
+[root@host ~]# usermod -g group01 user02
+[root@host ~]# id user02
+uid=1006(user02) gid=10000(group01) groups=10000(group01)
+Use the usermod -aG command to add a user to a supplementary group.
+
+[root@host ~]# id user03
+uid=1007(user03) gid=1009(user03) groups=1009(user03)
+[root@host ~]# usermod -aG group01 user03
+[root@host ~]# id user03
+uid=1007(user03) gid=1009(user03) groups=1009(user03),10000(group01)
+Important
+The usermod command -a option enables the append mode. Without the -a option, the command removes the user from any of their current supplementary groups that are not included in the -G option's list.
+
+Compare Primary and Supplementary Group Membership
+A user's primary group is the group that is viewed on the user's account in the /etc/passwd file. A user can belong to only one primary group at a time.
+
+A user's supplementary groups are the additional groups that are configured for the user and viewed on the user's entry in the /etc/group file. A user can belong to as many supplementary groups as is necessary to implement file access and permissions effectively.
+
+For configuring group-based file permissions, no difference exists between a user's primary and supplementary groups. If the user belongs to any group that is assigned access to specific files, then that user has access to those files.
+
+The only distinction between a user's primary and supplementary memberships is when a user creates a file. New files must have a user owner and a group owner, which is assigned when the file is created. The user's primary group is used for the new file's group ownership, unless command options override it.
+
+Temporarily Change Your Primary Group
+Only a user's primary group is used for new file creation attributes. However, you can temporarily switch your primary group to a supplementary group that you already belong to. You might switch if you are about to create files, manually or scripted, and want to assign a different group as owner when they are being created.
+
+Use the newgrp command to switch your primary group, in this shell session. You can switch between any primary or supplementary group that you belong to, but only one group at a time can be primary. Your primary group returns to the default if you log out and log in again. In this example, the group01 group temporarily becomes this user's primary group.
+
+[user03@host ~]# id
+uid=1007(user03) gid=1009(user03) groups=1009(user03),10000(group01)
+[user03@host ~]$ newgrp group01
+[user03@host ~]# id
+uid=1007(user03) gid=10000(group01) groups=1009(user03),10000(group01)
+References
+group(5), groupadd(8), groupdel(8), and usermod(8) man pages
