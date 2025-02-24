@@ -1,0 +1,118 @@
+Manage User Passwords
+Objectives
+Set a password management policy for users, and manually lock and unlock user accounts.
+
+Shadow Passwords and Password Policy
+Originally, encrypted passwords were stored in the world-readable /etc/passwd file. These passwords were considered adequate until dictionary attacks on encrypted passwords became common. The cryptographically hashed passwords were moved to the /etc/shadow file, which only the root user can read.
+
+Like the /etc/passwd file, each user has an entry in the /etc/shadow file. An example entry from the /etc/shadow file has nine colon-separated fields:
+
+[root@host ~]# cat /etc/shadow
+...output omitted...
+user03:$6$CSsXsd3rwghsdfarf:17933:0:99999:7:2:18113:
+Each field of this code block is separated by a colon:
+
+user03 : Name of the user account.
+
+$6$CSsXsd3rwghsdfarf : The cryptographically hashed password of the user.
+
+17933 : The days from the epoch when the password was last changed, where the epoch is 1970-01-01 in the UTC time zone.
+
+0 : The minimum days since the last password change before the user can change it again.
+
+99999 : The maximum days without a password change before the password expires. An empty field means that the password never expires.
+
+7 : The number of days ahead to warn the user that their password will expire.
+
+2 : The number of days without activity, starting with the day that the password expired, before the account is automatically locked.
+
+18113 : The day when the account expires in days since the epoch. An empty field means that the account never expires.
+
+The last field is typically empty and is reserved for future use.
+
+Format of an Cryptographically Hashed Password
+The cryptographically hashed password field stores three pieces of information: the hashing algorithm in use, the salt, and the cryptographical hash. Salt adds random data to the cryptographical hash, for creating a unique hash to strengthen the cryptographically hashed password. Each piece of information is delimited by the dollar ($) character.
+
+$6$CSsXcYG1L/4ZfHr/$2W6evvJahUfzfHpc9X.45Jc6H30E
+6 : The hashing algorithm in use for this password. A 6 indicates a SHA-512 hash, the RHEL 9 default; a 1 indicates MD5; and a 5 indicates SHA-256.
+
+CSsXcYG1L/4ZfHr/ : The salt in use to cryptographically hash the password; it is originally chosen at random.
+
+2W6evvJahUfzfHpc9X.45Jc6H30E : The cryptographical hash of the user's password; combining the salt and the plain text password and then cryptographically hashing to generate the password hash.
+
+The primary reason to combine a salt with the password is to defend against attacks that use pre-computed lists of password hashes. Adding salts changes the resulting hashes, which makes the pre-computed list useless. If an attacker obtains a copy of an /etc/shadow file that uses salts, then they need to guess passwords with brute force, which requires more time and effort.
+
+Password Verification
+When a user tries to log in, the system looks up the entry for the user in the /etc/shadow file, and combines the salt for the user with the plain text typed password. The system then cryptographically hashes the combination of the salt and plain text password with the specified hashing algorithm. If the result matches the cryptographical hash, then the user typed the right password. If the result does not match the cryptographical hash, then the user typed the wrong password and the login attempt fails. This method enables the system to determine whether the user typed the correct password without storing that password in a usable form for logging in.
+
+Configure Password Aging
+The following diagram shows the relevant password aging parameters, which can be adjusted by using the chage command to implement a password aging policy. Notice that the command name is chage, which stands for "change age". Do not confuse the command with the word "change".
+
+
+Figure 6.1: Password aging parameters
+The following example demonstrates the chage command to change the password policy of the sysadmin05 user. The command defines a minimum age (-m) of zero days, a maximum age (-M) of 90 days, a warning period (-W) of 7 days, and an inactivity period (-I) of 14 days.
+
+[root@host ~]# chage -m 0 -M 90 -W 7 -I 14 sysadmin05
+Assume that you manage the user password policies on a Red Hat server. The cloudadmin10 user is new in the system, and you want to set a custom password aging policy. You want to set the account expiration 30 days from today, so you use the following commands:
+
+[root@host ~]# date +%F 1
+2022-03-10
+[root@host ~]# date -d "+30 days" +%F 2
+2022-04-09
+[root@host ~]# chage -E $(date -d "+30 days" +%F) cloudadmin10 3
+[root@host ~]# chage -l cloudadmin10 | grep "Account expires" 4
+Account expires						: Apr 09, 2022
+1
+
+Use the date command to get the current date.
+
+2
+
+Use the date command to get the date 30 days from now.
+
+3
+
+Use the chage command -E option to change the expiration date for the cloudadmin10 user.
+
+4
+
+Use the chage command -l option to display the password aging policy for the cloudadmin10 user.
+
+After a few days, you notice in the /var/log/secure log file that the cloudadmin10 user has a strange behavior. The user tried to use sudo to interact with files that belong to other users. You suspect that the user might have left an ssh session open when working in another machine. You want the cloudadmin10 user to change the password on the next login, so you use the following command:
+
+[root@host ~]# chage -d 0 cloudadmin10
+The next time that the cloudadmin10 user logs in, the user is prompted to change the password.
+
+Note
+The date command can calculate a future date. The -u option reports the time in UTC.
+
+[user01@host ~]$ date -d "+45 days" -u
+Thu May 23 17:01:20 UTC 2019
+You can change the default password aging configuration in the /etc/login.defs file. The PASS_MAX_DAYS and PASS_MIN_DAYS options set the default maximum and minimum age of the password respectively. The PASS_WARN_AGE sets the default warning period of the password. Any change in the default password aging policies affects users that are created after the change. The existing users continue to use the earlier password aging settings rather than the later ones. For more information about the /etc/login.defs file, refer to the Red Hat Security: Linux in Physical, Virtual, and Cloud (RH415) course and the login.defs(5) man page.
+
+Restrict Access
+You can use the usermod command to modify account expiration for a user. For example, the usermod command -L option locks a user account and the user cannot log in to the system.
+
+[root@host ~]# usermod -L sysadmin03
+[user01@host ~]$ su - sysadmin03
+Password: redhat
+su: Authentication failure
+If a user leaves the company on a certain date, then you can lock and expire the account with a single usermod command. The date must be the number of days since 1970-01-01, or else use the YYYY-MM-DD format. In the following example, the usermod command locks and expires the cloudadmin10 user at 2022-08-14.
+
+[root@host ~]# usermod -L -e 2022-08-14 cloudadmin10
+When you lock an account, you prevent the user from authenticating with a password to the system. This method is recommended to prevent access to an account by a former employee of the company. Use the usermod command -U option to enable the access to the account again.
+
+The nologin Shell
+The nologin shell acts as a replacement shell for the user accounts that are not intended to log in interactively to the system. It is good security practice to disable an account from logging in to the system when the account does not require it. For example, a mail server might require an account to store mail and a password for the user to authenticate with a mail client to retrieve mail. That user does not need to log in directly to the system.
+
+A common solution to this situation is to set the user's login shell to /sbin/nologin. If the user attempts to log in to the system directly, then the nologin shell closes the connection.
+
+[root@host ~]# usermod -s /sbin/nologin newapp
+[root@host ~]# su - newapp
+Last login: Wed Feb  6 17:03:06 IST 2019 on pts/0
+This account is currently not available.
+Important
+The nologin shell prevents interactive use of the system, but does not prevent all access. Users might be able to authenticate and upload or retrieve files through applications such as web applications, file transfer programs, or mail readers if they use the user's password for authentication.
+
+References
+chage(1), usermod(8), shadow(5), crypt(3), and login.defs(5) man pages.
