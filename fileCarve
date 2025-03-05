@@ -25,3 +25,80 @@ cat access.log | egrep -o "Firefox/.*" | sort | uniq -c
 # What is the most common HTTP method used? Get the unique values with a count of the occurrences of each value, and then sort in descending numeric order. 
 
 cat access.log | awk -F " " '{print $6}' | sort | uniq -c | sort -rn
+
+# What IP address did "ftpuser" first log in from?
+
+cat vsftpd.log | grep ftpuser
+
+Search for any entries that include “ftpuser”. One of these lines should include an IP address. 
+#  What is the first directory that ftpuser created? 
+
+cat vsftpd.log | grep ftpuser | grep -i mkdir | head -n 1
+
+Search for the first entry of the ftpuser account running the mkdir command.
+# . What is the last directory that ftpuser created?
+
+cat vsftpd.log | grep ftpuser | grep -i mkdir | tail -n 1
+
+Search for the last entry of the ftpuser account running the mkdir command.
+Q4. What file extension was the most used by ftpuser?
+
+cat vsftpd.log | grep ftpuser | grep 'OK UPLOAD' | awk -F ',' '{print  $2 }' | cut -d '"' -f 2 | awk -F "." '{print $NF }' | sort | uniq -c
+
+Search for successful file upload entries from ftpuser, extract the file extension for those uploads, and then get the frequency count for each unique file extension 
+Q5. What is the username of the other user in this log?
+Visually inspect the log file for any other usernames. One example can be found on line 249. 
+
+cat vsftpd.log | grep '\[.*\] \[.*\]' | awk -F ' ' '{print $8}' | sort | uniq 
+
+Search for lines that contain the pattern [.*] [.*] as these lines contain the usernames. Then, extract the username column, sort, and then get the unique results. Note that the backslashes in the grep command are needed to escape the [ and ] characters. 
+Q6. What IP address did this other user log in from?
+
+cat vsftpd.log | grep jimmy
+
+Search for any entries that include jimmy. One of these lines should include an IP address. 
+Q7. How many total bytes did this other user upload?
+
+cat vsftpd.log | grep jimmy | grep 'OK UPLOAD' | awk -F ',' '{print  $3 }' | cut -f 2 -d ' ' | awk '{s+=$1} END {printf "%.0f\n", s}'
+
+Search for successful file upload entries from jimmy, extract the number of bytes transferred, then sum the bytes
+Q8. How many total bytes did ftpuser upload?
+
+cat vsftpd.log | grep ftpuser | grep 'OK UPLOAD' | awk -F ',' '{print  $3 }' | cut -f 2 -d ' ' | awk '{s+=$1} END {printf "%.0f\n", s}'
+
+Search for successful file upload entries from ftpuser, extract the number of bytes transferred, then sum the bytes
+Q9. How many total bytes did ftpuser download?
+
+cat vsftpd.log | grep ftpuser | grep 'OK DOWNLOAD' | awk -F ',' '{print  $3 }' | cut -f 2 -d ' ' | awk '{s+=$1} END {printf "%.0f\n", s}'
+
+Search for successful file download entries from ftpuser, extract the number of bytes transferred, then sum the bytes
+Q10. Identify the IP address of the suspicious login (the login with no subsequent activity)
+
+cat vsftpd.log | grep 'OK LOGIN' | awk -F '"' '{print $2 }' | sort | uniq
+
+ How many total login attempts were made in this log?
+
+cat login.log | wc -l
+
+Get the line count of the log
+How many unique usernames appear in this log?
+
+cat login.log | cut -f 3 | sort | uniq | wc -l
+
+Extract the third field (with the usernames) of the log, sort the usernames, get the unique usernames, and then get a line count of the number of unique usernames
+ What is the username with the most login attempts?
+
+cat login.log | cut -f 3 | sort | uniq -c |sort -n
+
+Extract the third field (with the usernames) of the log, sort the usernames, get a frequency count of each unique username, and then sort the unique usernames by frequency
+How many attempts were made for the username with the most login attempts?
+Use the same command as the question above
+
+ What is the date with the most login attempts?
+
+cat login.log | cut -f 1 | cut -d " " -f 1 | sort | uniq -c | sort -n
+
+Extract the first field (with the date+time) of the log, extract just the date, sort the dates, get a frequency count of each unique date, and then sort the unique dates by frequency
+ What is the username that had logins from the most unique IP addresses?
+
+cat login.log | cut -f 2,3 | sort | uniq | cut -f 2 | sort | uniq -c | sort -n
