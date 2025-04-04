@@ -30,6 +30,25 @@ Special Character	Description
 \u	Current username
 \w	Full path of the current working directory
 
+Command	Description
+whoami	Displays current username.
+id	Returns users identity
+hostname	Sets or prints the name of current host system.
+uname	Prints basic information about the operating system name and system hardware.
+pwd	Returns working directory name.
+ifconfig	The ifconfig utility is used to assign or to view an address to a network interface and/or configure network interface parameters.
+ip	Ip is a utility to show or manipulate routing, network devices, interfaces and tunnels.
+netstat	Shows network status.
+ss	Another utility to investigate sockets.
+ps	Shows process status.
+who	Displays who is logged in.
+env	Prints environment or sets and executes command.
+lsblk	Lists block devices.
+lsusb	Lists USB devices
+lsof	Lists opened files.
+lspci	Lists PCI devices.
+Let us scroll to the bottom of the page, spawn the target machine, then connect to it using SSH. Then, try to follow along and reproduce as many of the example shown in the section.
+
 Principle	Description
 Everything is a file	All configuration files for the various services running on the Linux operating system are stored in one or more text files.
 Small, single-purpose programs	Linux offers many different tools that we will work with, which can be combined to work together.
